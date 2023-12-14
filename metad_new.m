@@ -10,26 +10,34 @@ sigma_t1 = 1;
 p = 0.5;
 metadprime = [dprime*1.1, 1.3, 1.5];
 Number_trials = 10^6;
+
+% type 1 decision boundary
 t1c = 0;
 
 % t2r1 = [.05:.05:1];
 % t2r1 = [0.1 0.3 0.6];
+% type 2 decision boundaries when type 1 response was 1
 t2r1 = [0.2 0.4];
 % t2r1 = [0.3];
+% type 2 decision boundaries when type 1 response was 0
 t2r0 = fliplr(-t2r1);
 % t2r0 = [-0.3];
 
-stimID = zeros(length(metadprime), Number_trials);
+
+%% matrix initialization
+stimID   = zeros(length(metadprime), Number_trials);
 response = zeros(length(metadprime), Number_trials);
-rating = zeros(length(metadprime), Number_trials);
+rating   = zeros(length(metadprime), Number_trials);
 
 for iM = 1:length(metadprime)
     metadprime_now = metadprime(iM);
     sde = sqrt((dprime/metadprime_now)^2-1);
 
+    % simulate stimuli
     S = binornd(1, p, 1, Number_trials);
     stimID(iM, :) = S;
 
+    % simulate responses
     [r_t1,r_t2]=second_ord_model_sampler(S,dprime,metadprime_now,t1c,t2r0,t2r1);
 
     response(iM, :) = r_t1;
@@ -44,6 +52,8 @@ md_idx = 1;
 % sim = metad_sim_Fleming(1.5, 1.3, 0, -.3, .3, Number_trials);
 % nR_S1_0 = sim.nR_S1;
 % nR_S2_0 = sim.nR_S2;
+
+%% fitting the model
 
 options.UncertaintyHandling = 1;    % Tell BADS that the objective is noisy
 options.MaxIter = 200;%150;
@@ -65,7 +75,7 @@ for rep = 1:1
 end
 %%
 disp('ours: '+string((par_m(2)/metadprime(1)-1)*100))
-return
+
 
 res = fit_meta_d_MLE(nR_S1_0, nR_S2_0);
 % 
